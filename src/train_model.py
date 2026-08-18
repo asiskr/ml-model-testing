@@ -1,24 +1,26 @@
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, mean_absolute_error
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+
+from src.config import RANDOM_STATE, TEST_SIZE
 
 
-def split_data(X, y, test_size=0.2, random_state=42):
+def split_data(X, y, test_size=TEST_SIZE, random_state=RANDOM_STATE):
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=test_size, random_state=random_state
     )
     return X_train, X_test, y_train, y_test
 
 
-def train_decision_tree(X_train, y_train):
-    model = DecisionTreeClassifier(random_state=42)
+def train_decision_tree(X_train, y_train, max_depth=None):
+    model = DecisionTreeClassifier(max_depth=max_depth, random_state=RANDOM_STATE)
     model.fit(X_train, y_train)
     return model
 
 
 def train_random_forest(X_train, y_train):
-    model = RandomForestClassifier(random_state=42)
+    model = RandomForestClassifier(random_state=RANDOM_STATE)
     model.fit(X_train, y_train)
     return model
 
