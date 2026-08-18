@@ -9,3 +9,4 @@ FEATURES = ["Pclass", "Sex", "Age", "SibSp", "Parch", "Fare", "Embarked"]
 
 TEST_SIZE = 0.2
 RANDOM_STATE = 42
+MAX_DEPTH = 3
