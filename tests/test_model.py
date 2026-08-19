@@ -1,6 +1,7 @@
 import pytest
 from sklearn.metrics import accuracy_score
 import pandas as pd
+import pickle
 
 from src.load_data import load_data, separate_features_target
 from src.clean_data import clean_data
@@ -28,7 +29,7 @@ def model_data():
 
     return X_train, X_test, y_train, y_test
 
-
+@pytest.mark.model
 def test_model_accuracy_above_threshold(model_data):
     X_train, X_test, y_train, y_test = model_data
 
@@ -46,7 +47,7 @@ def test_model_accuracy_above_threshold(model_data):
 
     assert accuracy >= 0.75
 
-
+@pytest.mark.model
 def test_model_not_overfitting(model_data):
     X_train, X_test, y_train, y_test = model_data
 
@@ -72,7 +73,7 @@ def test_model_not_overfitting(model_data):
 
     assert gap < 0.15
 
-
+@pytest.mark.model
 def test_model_deterministic(model_data):
     X_train, X_test, y_train, y_test = model_data
 
@@ -87,7 +88,7 @@ def test_model_deterministic(model_data):
 
     assert (prediction_1 == prediction_2).all()
 
-
+@pytest.mark.model
 def test_single_row_prediction(model_data):
     X_train, X_test, y_train, y_test = model_data
 
@@ -103,7 +104,7 @@ def test_single_row_prediction(model_data):
 
     assert len(predictions) == 1
 
-
+@pytest.mark.model
 def test_prediction_shape(model_data):
     X_train, X_test, y_train, y_test = model_data
 
@@ -118,7 +119,7 @@ def test_prediction_shape(model_data):
     assert len(predictions) == len(X_test)
     assert set(predictions).issubset({0, 1})
 
-
+@pytest.mark.model
 def test_model_rejects_wrong_columns(model_data):
     X_train, X_test, y_train, y_test = model_data
 
@@ -133,7 +134,7 @@ def test_model_rejects_wrong_columns(model_data):
     with pytest.raises(Exception):
         model.predict(bad_data)
 
-
+@pytest.mark.model
 def test_random_forest_beats_decision_tree(model_data):
     X_train, X_test, y_train, y_test = model_data
 
@@ -157,6 +158,7 @@ def test_random_forest_beats_decision_tree(model_data):
 
     assert accuracy_rf >= accuracy_dt
 
+@pytest.mark.model
 def test_duplicate_row_same_prediction(model_data):
     X_train, X_test, y_train, y_test = model_data
     model = train_random_forest(X_train, y_train, max_depth=3)
@@ -168,3 +170,42 @@ def test_duplicate_row_same_prediction(model_data):
     predictions = model.predict(duplicated)
     
     assert predictions[0] == predictions[1] == predictions[2]
+
+@pytest.mark.model
+def test_first_class_higher_survival(model_data):
+    X_train, X_test, y_train, y_test = model_data
+    model = train_random_forest(X_train, y_train, max_depth=3)
+
+    passengar = X_test.head(1).copy()
+
+    passengar["Pclass"] = 1
+    probability1 = model.predict_proba(passengar)[0][1]
+
+    passengar["Pclass"] = 3
+    probability3 = model.predict_proba(passengar)[0][1]
+
+    assert probability1>probability3
+
+@pytest.mark.model
+def test_golden_predictions(model_data):
+    X_train, X_test, y_train, y_test = model_data
+    model = train_decision_tree(X_train, y_train, max_depth=5)
+    
+    first_five = X_test.head(5)
+    predictions = model.predict(first_five)
+    print(predictions)
+    assert list(predictions) == [0, 0, 0, 1, 1]
+
+@pytest.mark.model
+def test_no_regression(model_data):
+
+    X_train, X_test, y_train, y_test = model_data
+    model = train_random_forest(X_train, y_train, max_depth=3)
+
+    predictions_rf = model.predict(X_test)
+    accuracy_rf = accuracy_score(y_test, predictions_rf)
+    with open("baseline_model.pkl", "rb")as f:
+        baseline = pickle.load(f)
+        baseline_accuracy = baseline["accuracy"]
+
+    assert accuracy_rf >= baseline_accuracy - 0.05
