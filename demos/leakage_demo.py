@@ -38,3 +38,4 @@ acc_r = accuracy_score(y_test_r, model_r.predict(X_test_r))
 
 print(f"WRONG way (leakage):  {acc_w:.2%}")
 print(f"RIGHT way (no leak):  {acc_r:.2%}")
+print(f"Difference:           {acc_w - acc_r:.2%}")
