@@ -18,6 +18,7 @@ def test_schema_passes_on_raw_data(titanic_df):
         ("Sex", "unknown"),
         ("Age", 150.0),
         ("Fare", -1.0),
+        ("Embarked", "T")
     ],
 )
 def test_schema_rejects_bad_value(titanic_df, column, bad_value):

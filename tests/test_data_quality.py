@@ -39,3 +39,7 @@ def test_fare_is_never_negative(titanic_df):
 
 def test_known_zero_fare_rows(titanic_df):
     assert len(zero_fare_rows(titanic_df)) == 15
+
+def test_pclass_only_valid_values(titanic_df):
+
+    assert titanic_df["Pclass"].isin([1,2,3]).all()

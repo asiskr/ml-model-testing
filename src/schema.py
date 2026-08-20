@@ -9,6 +9,7 @@ titanic_schema = pa.DataFrameSchema(
         "Sex": pa.Column(str, pa.Check.isin(["male", "female"])),
         "Age": pa.Column(float, nullable=True, checks=pa.Check.in_range(0, 120)),
         "Fare": pa.Column(float, checks=pa.Check.ge(0)),
+        "Embarked": pa.Column(str, nullable=True, checks=pa.Check.isin(["S", "C", "Q"])),
     }
 )
 
